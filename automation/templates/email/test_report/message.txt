@@ -1,0 +1,8 @@
+{{msg}}
+
+User Name : {{user_name}}
+Updated On: {{current_time}} IST
+
+
+Regards,
+ShieldSquare Admin.

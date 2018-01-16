@@ -1,0 +1,46 @@
+{% load staticfiles %}
+Hello,<br/><br/> 
+This is ShieldSquare connector automation testing report. Please find the below configurations and test report.<br/><br/>
+<b>Configurations:</b><br/>
+<table style="width:60%; border: 1px solid #dddddd;">
+    <tr>
+        <td style="background-color: #dddddd;">Subscriber ID</td>
+        <td>{{config.sid}}</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">Mode</td>
+        <td>{% if config.mode %}Active{% else %}Monitor{% endif %}</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">Environment ID</td>
+        <td>{{config.env}}</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">URL</td>
+        <td>{{config.url}}</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">Waiting time to execute BigQuery</td>
+        <td>{{config.bq_delay}} sec</td>
+    </tr>
+
+</table><br/><br/>
+<b>Test Report:</b>
+<table style="width:60%; border: 1px solid #dddddd;">
+    <tr>
+        <td style="background-color: #dddddd;">Start Time</td>
+        <td>{{report_attr.start_time}} UTC</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">Duration</td>
+        <td>{{report_attr.duration}}</td>
+    </tr>
+    <tr>
+        <td style="background-color: #dddddd;">Status</td>
+        <td>{{report_attr.status}}</td>
+    </tr>
+</table>
+<br/><br/>
+Regards,<br/>
+ShieldSquare Admin.<br/><br/>
+<b>Note:</b> This is an auto generated email and please don't respond to this email id.

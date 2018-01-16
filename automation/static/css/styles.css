@@ -1,0 +1,129 @@
+.navbar-inverse {
+    background-color:#777 !important;
+}
+
+.loader {
+	text-align: center;
+}
+
+/*body        { font-family: verdana, arial, helvetica, sans-serif; font-size: 100%; }*/
+table       { font-size: 100%; }
+pre         { }
+
+/* -- heading ---------------------------------------------------------------------- */
+/* h1 {
+	font-size: 16pt;
+	color: gray;
+}
+.heading {
+    margin-top: 0ex;
+    margin-bottom: 5ex;
+}
+
+.heading .attribute {
+    margin-top: 1ex;
+    margin-bottom: 0;
+}
+
+.heading .description {
+    margin-top: 4ex;
+    margin-bottom: 6ex;
+} */
+
+.test_status {
+    background: #1ABC9C;
+    border-radius: 15px;
+    width: 80%;
+    color: white;
+    margin-bottom: 40px;
+    font: normal 13px Arial, sans-serif;
+    padding: 5px;
+    text-align: center;
+}
+
+/* -- css div popup ------------------------------------------------------------------------ */
+a.popup_link {
+}
+
+a.popup_link:hover {
+    color: red;
+}
+
+.popup_window {
+    display: none;
+    position: relative;
+    left: 0px;
+    top: 0px;
+    /*border: solid #627173 1px; */
+    padding: 10px;
+    background-color: #E6E6D6;
+    font-family: "Lucida Console", "Courier New", Courier, monospace;
+    text-align: left;
+    font-size: 8pt;
+    width: 500px;
+}
+
+}
+/* -- report ------------------------------------------------------------------------ */
+#show_detail_line {
+    margin-top: 3ex;
+    margin-bottom: 1ex;
+}
+
+.result_table {
+    /* width: 80%;
+    border-collapse: collapse;
+    border: 1px solid #777; */
+    width: 80%;
+    border: solid 1px #DDEEEE;
+    border-radius: 15px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font: normal 13px Arial, sans-serif;    
+}
+
+#header_row {
+    font-weight: bold;
+    color: white;
+    background-color: #1ABC9C;
+}
+
+.result_table tr:nth-child(even){background-color: #f2f2f2}
+.result_table tr:last-child{background-color: #1ABC9C;}
+.result_table th, td{
+    /* border: 1px solid #777; */
+    text-align: left;
+    padding: 10px !important;
+}
+#total_row  { font-weight: bold; }
+.passClass  { background-color: #4CAF50; }
+.failClass  { background-color: #c60; }
+.errorClass { background-color: #c00; }
+.passCase   { color: #6c6; }
+.failCase   { color: #c60; font-weight: bold; }
+.errorCase  { color: #c00; font-weight: bold; }
+.hiddenRow  { display: none; }
+.testcase   { margin-left: 2em; }
+
+/* -- ending ---------------------------------------------------------------------- */
+#ending {
+}
+
+.config_fm {
+    margin: 50px 0 50px;
+}
+
+.t_txt_update {
+    float: left;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 20px;
+    padding: 30px;
+    background: #1ABC9C;
+    margin-top: 25px;
+    border-radius: 15px;
+    color: white;
+}
+

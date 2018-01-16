@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block extra_styles %}
+    <style type="text/css">
+    .pie_progress {
+        width: 160px;
+        margin: 10px auto;
+    }
+    /* @media all and (max-width: 768px) { */
+    .pie_progress {
+        width: 80%;
+        max-width: 150px;
+    }
+    /* } */
+    
+    .panel-heading .accordion-toggle:after {
+        /* symbol for "opening" panels */
+        font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+        content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+        float: right;        /* adjust as needed */
+        color: grey;         /* adjust as needed */
+    }
+    .panel-heading .accordion-toggle.collapsed:after {
+        /* symbol for "collapsed" panels */
+        content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+    }
+    
+  </style>
+{% endblock %}
+{% block extra_scripts %}
+<script type="text/javascript">
+    var progressUpdater = null;
+    var report_ajax = null;
+    $(document).ready(function(){
+        $('.pie_progress').asPieProgress({
+            namespace: 'pie_progress',
+            first: 0,
+            max: 100
+        });
+        
+        $('#cust_test').tokenfield({
+            autocomplete: {
+                source: ['test_PI_00001','test_PI_00002','test_PI_00003',
+                        'test_PI_00004','test_PI_00005','test_PI_00006',
+                        'test_PI_00007','test_PI_00008','test_PI_00009',
+                        'test_PI_00010','test_PI_00011','test_PI_00012',
+                        'test_PI_00013','test_PI_00014','test_PI_00015',
+                        'test_PI_00016'],
+                delay: 100
+            },
+            showAutocompleteOnFocus: false
+        });
+        
+        $('#e_to').tokenfield({
+            autocomplete: {
+                source: ['narasimha.m@shieldsquare.com', 'jyoti@shieldsquare.com',
+                         'karthik.j@shieldsquare.com', 'manickam.s@shieldsquare.com'],
+                delay: 100
+            },
+            showAutocompleteOnFocus: false
+        });
+        
+        $('#e_cc').tokenfield({
+            autocomplete: {
+                source: ['narasimha.m@shieldsquare.com', 'connector_support_l2@shieldsquare.com',
+                        'jyoti@shieldsquare.com', 'manickam.s@shieldsquare.com'],
+                delay: 100
+            },
+            showAutocompleteOnFocus: false
+        });
+
+/*        $("#ctest_chk").click(function(){
+            if(this.checked) {
+                $("#ctest").show();
+            } else {
+                $("#ctest").hide();
+            }
+        }); */ 
+        
+        $("#email_chk").click(function(){
+            if(this.checked) {
+                $("#cmail").show();
+            } else {
+                $("#cmail").hide();
+            }
+        });
+
+        $(".t_form").on('submit', function(e){
+            e.preventDefault();
+
+            if($("#rntest").text() == "Cancel") {
+                cancel_test();
+                return false;
+            }
+
+            if(validate_form())
+                return false;
+
+            var live_id = Math.floor(Math.random()*900000) + 10000;
+            $("#liveid").val(live_id);
+            $('.pie_progress').asPieProgress('reset');
+            $("#total_tests").html("");
+            $("#cur_test").html("");
+            $("#st_cancel").hide();
+            $(".test_report").hide();
+            $(".live_report").show();
+            $("#rntest").text('Cancel');
+            $("#rntest").addClass('btn-danger').removeClass('btn-success');
+            
+            progressUpdater = setInterval(liveUpdater,5000);
+
+            report_ajax = $.ajax({
+                type: 'POST',
+                dataType: 'html',
+                url: "{% url 'report' %}",
+                data: $(this).serialize(),
+                success: function(data){
+                    clearInterval(progressUpdater);
+                    $(".live_report").hide();
+                    $(".test_report").html(data);
+                    $("#rntest").text('Run Test');
+                    $("#rntest").addClass("btn-success").removeClass("btn-danger");
+                    $(".test_report").show();
+                    report_ajax = null;
+                },
+                error: function(error){
+                    clearInterval(progressUpdater);
+                    $("#rntest").text('Run Test');
+                    $("#rntest").addClass("btn-success").removeClass("btn-danger");
+                    $(".live_report").show();
+                }
+            });
+            
+
+        });
+    });
+
+
+function cancel_test()
+{
+    clearInterval(progressUpdater);
+    var live_id = $("#liveid").val();
+    $.ajax({
+        url: "{% url 'cancel_test' %}",
+        method: 'POST',
+        data: {'liveupdate': live_id},
+        success: function(data){
+            clearInterval(progressUpdater);
+            if(report_ajax != null) {
+                $("#rntest").text('Run Test');
+                $("#rntest").addClass("btn-success").removeClass("btn-danger");
+                $(".live_report").hide();
+                $(".test_report").hide();
+                $("#st_cancel").html("***** Cancelled test at "+new Date()+" *****");
+                $("#st_cancel").show();                        
+                report_ajax.abort();
+                report_ajax = null;
+            }
+        },
+        error: function(data){
+            console.log(data);
+        }
+    })
+    return;    
+}
+
+function liveUpdater()
+{
+    var live_id = $("#liveid").val();
+    $.ajax({
+        url: "{% url 'live_report' %}",
+        method: 'POST',
+        data: {'liveupdate': live_id},
+        success: function(){
+        },
+        error: function(){
+        }
+    }).done(function(data){
+        if(data !== ""){
+            var temp = data.split("##");
+            $("#total_tests").html(temp[0]);
+            $("#cur_test").attr('title', temp[5]);
+            $("#cur_test").html(temp[4]);
+            var percentage = ((parseInt(temp[1])+parseInt(temp[2])+parseInt(temp[3]))/parseInt(temp[0]))*100;
+            $('.pie_progress').asPieProgress('go', percentage);
+            $(".pie_progress__label").html("<span style='color:#6c6;'>"+temp[1]+" P </span> : <span style='color:#c60;'>"+temp[2]+" F </span> : <span style='color:#c00;'>"+temp[3]+" E</span>");
+        }
+    });
+}
+
+
+function validate_form()
+{
+    var sid = $.trim($("#sid").val());
+    var url = $.trim($("#url").val());
+    var env = $.trim($("#env").val());
+
+    // SID validation
+    if(sid == '') {
+        alert("SID should not be empty");
+        return true;
+    } else if(isNaN(parseInt(sid))) {
+        alert("SID should be a number");
+        return true;
+    }
+    // Environment ID valiation
+    if(env == '') {
+        alert("Environment ID is empty");
+        return true;
+    } else if(env.length > 0) {
+        var env_split = env.split('-');
+        if(env_split.length < 5){
+            alert("Environment ID subparts are not equal to 5");
+            return true;
+        } else if(env_split.length == 5 && ((env_split[0].length != 8) || (env_split[1].length != 4) ||
+            (env_split[2].length != 4) || (env_split[3].length != 4) || (env_split[4].length != 12))) {
+            alert("Environment ID is invalid");
+            return true;
+        }
+    }
+    // URL validation
+    if(url == '') {
+        alert("URL should not be empty");
+        return true;
+    }
+    return false;
+}
+
+</script>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-xs-12 col-sm-8 col-md-4" id="accordion">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        Testing Automation Configuration
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <form role="form" class="t_form" action="" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="sid" id="sid" class="form-control input-sm" placeholder="SID">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="url" id="url" class="form-control input-sm" placeholder="URL">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="env" id="env" class="form-control input-sm" placeholder="Environment(Production ID)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-check-label">Custom Tests
+                                <input type="checkbox" id="cust_toggle" name="cust_toggle" checked data-toggle="toggle" data-on="Include" data-off="Skip" data-onstyle="success" data-offstyle="danger">
+                            </label>
+                            <div id="ctest">
+                                <input type="text" name="cust_test" id="cust_test" class="form-control input-sm" placeholder="Add Custom TestCases">
+                            </div>
+                        </div>                                                                                     
+                        <div class="form-group">
+                             <label class="form-check-label">Add Email
+                                <input type="checkbox" name="email_chk" id="email_chk">
+                            </label>
+                            <div id="cmail" style="display: none;">
+                                <input type="text" name="to" id="e_to" class="form-control input-sm" placeholder="To"><br>
+                                <input type="text" name="cc" id="e_cc" class="form-control input-sm" placeholder="Cc">
+                            </div>
+                        </div>
+                        
+                        <div class="col-xs-6 col-sm-6 col-md-4" style="padding-left: 0px;">
+                            <div class="form-group">
+                                <label class="form-check-label">Mode
+                                    <input type="checkbox" name="mode" id="mode" placeholder="Mode" checked>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-6 col-md-3">  
+                            <div class="form-group">
+                                    <input type="text" name="bq_time" id="bq_time" class="form-control input-sm" value="60" placeholder="BQ Delay">
+                            </div>
+                        </div>
+                        <span><small>(BQ Delay in sec)</small></span>  <br/>
+                        <div class="col-xs-12 col-sm-8 col-md-4 col-md-offset-4">                           
+                            <input type="hidden" name="liveupdate" value="" id="liveid">
+                            <button type="submit" value="Run Test" class="btn btn-success" id="rntest">Run Test</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-8 col-md-6 col-md-offset-1">
+            <div class="live_report"  style="display: none;">
+                <div class='t_txt_update'>
+                    Total Tests: <span id="total_tests"></span><br/>
+                    Running TestCase: <span id="cur_test" style="color:red;" title=''></span>
+                    <div id="st_cancel" style="display:none;"></div>
+                </div>
+                <div class="t_gr_update">
+                    <div class="pie_progress" role="progressbar" data-barcolor="#3daf2c" data-barsize="10" aria-valuemin="0" aria-valuemax="100">
+                    <div class="pie_progress__number" style="top:70%;">0%</div>
+                    <div class="pie_progress__label"><span style='color:#6c6;'>0 P </span>:<span style='color:#c60;'> 0 F </span>:<span style='color:#c00;'> 0 E</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row test_report"></div>
+</div>
+{% endblock %}
